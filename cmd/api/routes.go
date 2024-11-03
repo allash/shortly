@@ -1,16 +1,17 @@
 package main
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
 )
 
-func main() {
+func (app *Application) routes() *httprouter.Router {
 	router := httprouter.New()
-	router.GET("/:shortUrl", GetUrl)
-	router.POST("/url/shorten", GenerateShortUrl)
+
+	router.GET("/health", app.health)
+	router.GET("/v1/:shortUrl", app.getUrl)
+	router.POST("/v1/url/shorten", app.generateShortUrl)
 
 	router.GlobalOPTIONS = http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		if req.Header.Get("Access-Control-Request-Method") != "" {
@@ -22,7 +23,5 @@ func main() {
 		w.WriteHeader(http.StatusNoContent)
 	})
 
-
-	log.Fatal(http.ListenAndServe(":3000", router))
+	return router
 }
-

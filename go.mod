@@ -1,4 +1,4 @@
-module shorturl
+module shorturl.allash.com
 
 go 1.23.2
 

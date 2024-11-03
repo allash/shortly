@@ -1,8 +1,11 @@
-###
-GET http://localhost:3000/123
+
+GET http://localhost:3000/health
 
 ###
-POST http://localhost:3000/url/shorten
+GET http://localhost:3000/v1/123
+
+###
+POST http://localhost:3000/v1/url/shorten
 Content-Type: application/json
 
 {
