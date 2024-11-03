@@ -9,7 +9,8 @@ import (
 
 func main() {
 	router := httprouter.New()
-	router.GET("/hello", GetHello)
+	router.GET("/:shortUrl", GetUrl)
+	router.POST("/url/shorten", GenerateShortUrl)
 
 	router.GlobalOPTIONS = http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		if req.Header.Get("Access-Control-Request-Method") != "" {

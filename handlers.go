@@ -8,13 +8,34 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func GetHello(w http.ResponseWriter, request *http.Request, _ httprouter.Params) {
+var urlMappings = make(map[string]string)
+
+func GenerateShortUrl(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	fmt.Printf("Received request \n")
 
-	response := &ShortUrlResponse{}
+	var payload LongUrl
+
+	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+	}
+
+	urlMappings["123"] = payload.Value
+
+	response := &ShortUrlResponse{Value: "123"}
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(w).Encode(response); err != nil {
 		panic(err)
 	}
+}
+
+func GetUrl(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+	shortUrl := params.ByName("shortUrl")
+	fmt.Printf("Params: %s \n", params.ByName("shortUrl"))
+
+	longUrl := urlMappings[shortUrl]
+
+	w.WriteHeader(http.StatusOK)
+
+	json.NewEncoder(w).Encode(longUrl)
 }
