@@ -29,13 +29,15 @@ func (app *Application) generateShortUrl(w http.ResponseWriter, r *http.Request,
 
 	var payload data.LongUrl
 
-	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+	decodingErr := app.readJSON(w, r, &payload)
+	if decodingErr != nil {
+		app.badRequestResponse(w, r, decodingErr)
+		return
 	}
 
 	urlMappings["123"] = payload.Value
 
-	response := &data.ShortUrlResponse{Value: "123"}
+	response := &data.ShortUrlResponse{Value: payload.Value}
 	err := app.writeJSON(w, http.StatusOK, response, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
