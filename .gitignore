@@ -29,3 +29,5 @@ shortly
 tmp/
 
 bin/
+
+**/.DS_Store
