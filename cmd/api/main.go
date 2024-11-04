@@ -12,7 +12,7 @@ import (
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
-	"shorturl.allash.com/internal/data"
+	"shortly.allash.com/internal/data"
 )
 
 type Config struct {

@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
-	"shorturl.allash.com/internal/data"
-	"shorturl.allash.com/internal/generator"
+	"shortly.allash.com/internal/data"
+	"shortly.allash.com/internal/generator"
 )
 
 func (app *Application) health(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
