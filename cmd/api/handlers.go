@@ -30,7 +30,17 @@ func (app *Application) createShortUrl(w http.ResponseWriter, r *http.Request, _
 		return
 	}
 
-	newId := generator.GenerateId()
+	sf, err := generator.NewSnowflake(1, 1)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	newId, err := sf.NextId()
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
 	shortUrl := generator.Encode(newId)
 
 	urlMapping := &data.UrlMapping{
@@ -45,7 +55,7 @@ func (app *Application) createShortUrl(w http.ResponseWriter, r *http.Request, _
 		return
 	}
 
-	response := &data.ShortUrlResponse{Value: payload.Value}
+	response := &data.ShortUrlResponse{Value: shortUrl}
 	err = app.writeJSON(w, http.StatusOK, response, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
@@ -57,7 +67,7 @@ func (app *Application) getLongUrl(w http.ResponseWriter, r *http.Request, param
 
 	longUrl, err := app.models.UrlMappings.Get(shortUrl)
 	if err != nil {
-		app.serverErrorResponse(w, r, err)
+		app.notFoundResponse(w, r)
 		return
 	}
 
