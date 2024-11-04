@@ -12,7 +12,7 @@
 
 - Clone the repository
   ```sh
-  git clone https://github.com/yourusername/url-shortener-go.git
+  git clone git@github.com:allash/shortly.git
   cd shortly
   ```
 - Install dependencies
