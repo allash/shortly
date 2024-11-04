@@ -2,12 +2,12 @@
 GET http://localhost:3000/health
 
 ###
-GET http://localhost:3000/v1/123
+GET http://localhost:3000/v1/4N8IZ
 
 ###
 POST http://localhost:3000/v1/url/shorten
 Content-Type: application/json
 
 {
-    "value": "hello from vscode"
+    "value": "http://localhost:5000"
 }

@@ -1,0 +1,17 @@
+services:
+  postgres:
+    container_name: 'shorturl-postgres'
+    image: postgres
+    restart: always
+    shm_size: 128mb
+    environment:
+      - POSTGRES_PASSWORD=shorturl
+      - POSTGRES_USER=shorturl
+      - POSTGRES_DB=shorturl
+    ports:
+      - '5442:5432'
+    volumes:
+      - db:/var/lib/postgresql/data/
+
+volumes:
+  db:

@@ -1,20 +1,17 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/julienschmidt/httprouter"
 	"shorturl.allash.com/internal/data"
+	"shorturl.allash.com/internal/generator"
 )
-
-var urlMappings = make(map[string]string)
 
 func (app *Application) health(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	data := &data.HealthStatus {
 		Status: "available",
-		Environment: app.Config.Environment,
+		Environment: app.config.environment,
 		Version: "1.0",
 	}
 
@@ -24,33 +21,49 @@ func (app *Application) health(w http.ResponseWriter, r *http.Request, _ httprou
 	}
 }
 
-func (app *Application) generateShortUrl(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
-	fmt.Printf("Received request \n")
-
+func (app *Application) createShortUrl(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	var payload data.LongUrl
 
-	decodingErr := app.readJSON(w, r, &payload)
-	if decodingErr != nil {
-		app.badRequestResponse(w, r, decodingErr)
+	err := app.readJSON(w, r, &payload)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
 		return
 	}
 
-	urlMappings["123"] = payload.Value
+	newId := generator.GenerateId()
+	shortUrl := generator.Encode(newId)
+
+	urlMapping := &data.UrlMapping{
+		ID: newId,
+		ShortUrl: shortUrl,
+		LongUrl: payload.Value,
+	}
+	
+	err = app.models.UrlMappings.Insert(urlMapping)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
 
 	response := &data.ShortUrlResponse{Value: payload.Value}
-	err := app.writeJSON(w, http.StatusOK, response, nil)
+	err = app.writeJSON(w, http.StatusOK, response, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
 }
 
-func (app *Application) getUrl(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
+func (app *Application) getLongUrl(w http.ResponseWriter, r *http.Request, params httprouter.Params) {
 	shortUrl := params.ByName("shortUrl")
-	fmt.Printf("Params: %s \n", params.ByName("shortUrl"))
 
-	longUrl := urlMappings[shortUrl]
+	longUrl, err := app.models.UrlMappings.Get(shortUrl)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
 
-	w.WriteHeader(http.StatusOK)
-
-	json.NewEncoder(w).Encode(longUrl)
+	response := &data.LongUrl{Value: *longUrl}
+	err = app.writeJSON(w, http.StatusOK, response, nil)
+	if (err != nil) {
+		app.serverErrorResponse(w, r, err)
+	}
 }
